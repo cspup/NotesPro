@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cspup.notespro.mapper.LockMapper">
+    <resultMap id="LockMap" type="com.cspup.notespro.entity.Lock">
+        <id property="id" column="id"/>
+        <id property="noteId" column="note_id"/>
+        <result property="locked" column="locked"/>
+        <result property="password" column="password"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="selectLockById" resultMap="LockMap">
+        select id,note_id,locked,password,create_time,update_time from lockStatus
+        where id=#{id}
+    </select>
+
+    <select id="selectLockByNoteId" resultMap="LockMap">
+        select id,note_id,locked,password,create_time,update_time from lockStatus
+        where note_id = #{noteId} order by id limit 1
+    </select>
+
+    <update id="updateLock" parameterType="com.cspup.notespro.entity.Lock">
+        update lockStatus
+            <set>
+                locked = #{locked}
+            </set>
+        where note_id = #{noteId}
+    </update>
+
+    <insert id="insertLock" parameterType="com.cspup.notespro.entity.Lock">
+        insert into lockStatus (note_id, locked, password)
+        values (#{noteId},#{locked},#{password})
+    </insert>
+
+
+</mapper>
