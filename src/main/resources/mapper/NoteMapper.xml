@@ -17,7 +17,8 @@
         where label=#{label} order by update_time desc limit 1
     </select>
 
-    <insert id="initNote" parameterType="Note" useGeneratedKeys="true" keyProperty="id">
+
+    <insert id="addNote" parameterType="Note" useGeneratedKeys="true" keyProperty="id">
         insert into note(
                          label,content
         ) values(#{label},#{content})

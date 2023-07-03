@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.6</version>
+        <version>3.1.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.cspup</groupId>
@@ -15,17 +15,16 @@
     <description>NotesPro</description>
     <properties>
         <java.version>17</java.version>
+		<source.encoding>UTF-8</source.encoding>
     </properties>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
-            <version>3.0.4</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>3.0.4</version>
         </dependency>
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
@@ -36,7 +35,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
-            <version>3.0.4</version>
             <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
@@ -55,7 +53,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <version>3.0.4</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -76,5 +73,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

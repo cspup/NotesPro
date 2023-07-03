@@ -6,13 +6,13 @@ package com.cspup.notespro.entity;
  * @description
  */
 public class Note {
-    private int id;
+    private long id;
     private String createTime;
     private String updateTime;
     private String content;
     private String label;
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 

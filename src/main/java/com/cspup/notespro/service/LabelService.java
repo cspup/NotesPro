@@ -18,7 +18,6 @@ public class LabelService {
     NoteMapper noteMapper;
     public String generateLabel(){
         Random random = new Random(System.currentTimeMillis());
-        String label = String.valueOf(random.nextInt(10000));
-        return label;
+        return String.valueOf(random.nextInt(10000));
     }
 }

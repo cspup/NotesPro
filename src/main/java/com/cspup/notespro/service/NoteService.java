@@ -1,10 +1,12 @@
 package com.cspup.notespro.service;
 
+import com.cspup.notespro.entity.Lock;
 import com.cspup.notespro.entity.Note;
 import com.cspup.notespro.mapper.NoteMapper;
 import com.cspup.notespro.utils.SqlUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -26,32 +28,31 @@ public class NoteService {
     @Autowired
     private LockService lockService;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
     public NoteService(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
-    public Note createNote(String content, String label){
+    public void createNote(String content, String label){
         Note note = new Note();
         note.setContent(content);
         note.setLabel(label);
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        noteMapper.addNote(note);
+    }
 
-        String sql = "insert into note(content,label) values(?,?)";
-        Object[] objects = new Object[]{content,label};
-        jdbcTemplate.update(sql,objects);
-        return note;
+    public void createNote(Note note){
+        noteMapper.addNote(note);
     }
 
     public int updateNote(Note note){
         if (note.getId()==0){
-            return noteMapper.initNote(note);
-        }else{
-//            判断是否加锁
-            if (lockService.getLockStatus((long) note.getId())){
-                return -1;
-            }
-            return noteMapper.updateNote(note);
+            return noteMapper.addNote(note);
+        }else if (lockService.getLockStatus(note.getId())){
+            throw new RuntimeException("已加锁");
         }
+        return noteMapper.updateNote(note);
     }
 
     public String getLastContent(String label){
@@ -67,5 +68,15 @@ public class NoteService {
 
     public Note getLastNoteByLabel(String label){
         return noteMapper.selectNoteByLabel(label);
+    }
+
+    public int deleteNote(String label){
+        Note note = getLastNoteByLabel(label);
+        note.setContent("{\"ops\":[{\"insert\":\"Hello World!\\n\"}]}");
+        Lock lock = new Lock();
+        lock.setNoteId(note.getId());
+        lock.setLocked(false);
+        lockService.updateLock(lock);
+        return updateNote(note);
     }
 }

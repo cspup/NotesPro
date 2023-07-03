@@ -2,6 +2,7 @@ package com.cspup.notespro.controller;
 
 import com.cspup.notespro.entity.Note;
 import com.cspup.notespro.service.NoteService;
+import com.cspup.notespro.utils.R;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -29,6 +30,11 @@ public class NoteController {
         }
     }
 
+    /**
+     * 根据label获取note
+     * @param label label
+     * @return Note
+     */
     @RequestMapping(value = "/note/{label}",method = RequestMethod.GET)
     public Note getNote(@PathVariable(value = "label") String label){
         Note note = noteService.getLastNoteByLabel(label);
@@ -58,8 +64,14 @@ public class NoteController {
      * @param note 封装的对象
      */
     @PostMapping("/createNote2")
-    public void CreateNote(@RequestBody Note note){
-        noteService.createNote(note.getContent(),note.getLabel());
+    public R<?> CreateNote(@RequestBody Note note){
+        noteService.createNote(note);
+        return R.ok("创建成功");
+    }
 
+    @PostMapping("/deleteNote")
+    public R<?> deleteNote(@RequestBody Note note){
+        noteService.deleteNote(note.getLabel());
+        return R.ok();
     }
 }
