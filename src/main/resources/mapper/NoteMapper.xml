@@ -7,27 +7,28 @@
         <result property="content" column="content"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
+        <result property="logicTime" column="logic_time"/>
     </resultMap>
 
     <select id="selectNote">
         select id,label,content,create_time,update_time from note
     </select>
     <select id="selectNoteByLabel" parameterType="String" resultMap="Note">
-        select id,label,content,create_time,update_time from note
+        select id,label,content,create_time,update_time,logic_time from note
         where label=#{label} order by update_time desc limit 1
     </select>
 
 
     <insert id="addNote" parameterType="Note" useGeneratedKeys="true" keyProperty="id">
         insert into note(
-                         label,content
-        ) values(#{label},#{content})
+                         label,content,logic_time
+        ) values(#{label},#{content},#{logicTime})
     </insert>
 
     <update id="updateNote" parameterType="Note">
         update note
         <set>
-            content = #{content}
+            content = #{content},logic_time = #{logicTime}
         </set>
         where id = #{id}
     </update>

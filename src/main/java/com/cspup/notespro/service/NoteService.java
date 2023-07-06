@@ -1,5 +1,6 @@
 package com.cspup.notespro.service;
 
+import com.cspup.notespro.DTO.WsNote;
 import com.cspup.notespro.entity.Lock;
 import com.cspup.notespro.entity.Note;
 import com.cspup.notespro.mapper.NoteMapper;
@@ -78,5 +79,18 @@ public class NoteService {
         lock.setLocked(false);
         lockService.updateLock(lock);
         return updateNote(note);
+    }
+
+
+    /**
+     *
+     * @param wsNote 带客户端id的数据
+     * @return 成功条数
+     */
+    public int updateNote(WsNote wsNote){
+
+
+
+        return noteMapper.updateNote(wsNote.getNote());
     }
 }

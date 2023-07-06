@@ -3,6 +3,7 @@ package com.cspup.notespro.service;
 import com.cspup.notespro.entity.Lock;
 import com.cspup.notespro.mapper.LockMapper;
 import com.cspup.notespro.utils.Const;
+import com.cspup.notespro.utils.WebSocketServerUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -33,11 +34,10 @@ public class LockService {
         lockMapper.updateLock(lock);
     }
 
-    public void locked(Long noteId,String password){
+    public void locked(Long noteId,String password) throws Exception {
         Lock lock1 = lockMapper.selectLockByNoteId(noteId);
-        boolean isPasswordCorrectOrNull = (password==null&&lock1==null)
-                ||(password!=null&&password.equals(lock1.getPassword()))
-                ||(password==null&&lock1.getPassword()==null);
+        boolean isPasswordCorrectOrNull = (lock1==null)||(lock1.getPassword()==null)
+                ||(password!=null&&password.equals(lock1.getPassword()));
 
         if (isPasswordCorrectOrNull){
            if (lock1 == null) {
@@ -65,11 +65,14 @@ public class LockService {
      */
     public void unLock(Long noteId, String password){
         Lock lock1 = lockMapper.selectLockByNoteId(noteId);
-        boolean isPasswordCorrectOrNull = (password==null&&lock1.getPassword()==null)||(password!=null&&password.equals(lock1.getPassword()));
+        boolean isPasswordCorrectOrNull = (lock1==null)||(lock1.getPassword()==null)
+                ||(password!=null&&password.equals(lock1.getPassword()));
         if (isPasswordCorrectOrNull){
-            lock1.setLocked(false);
-            redisTemplate.opsForValue().set(Const.noteId+lock1.getNoteId(),String.valueOf(lock1.isLocked()));
-            lockMapper.updateLock(lock1);
+           if (lock1 != null) {
+                lock1.setPassword(password);
+                lock1.setLocked(false);
+                lockMapper.updateLock(lock1);
+            }
         }else {
             throw new RuntimeException("密码错误");
         }

@@ -1,11 +1,10 @@
 package com.cspup.notespro.controller;
 
 import com.cspup.notespro.service.NoteService;
+import com.cspup.notespro.utils.WebSocketUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author csp
@@ -22,6 +21,16 @@ public class IndexController {
     @RequestMapping(value = "/{any}", method = RequestMethod.GET)
     public String index(@PathVariable String any) {
         return "index";
+    }
+
+    /**
+     * 获取Websocket连接id
+     * @return wsId
+     */
+    @GetMapping(value = "/ws/getId")
+    @ResponseBody
+    public String getWsId(){
+        return WebSocketUtil.generateWsId();
     }
 
 }

@@ -11,16 +11,17 @@ public class Note {
     private String updateTime;
     private String content;
     private String label;
+    private long logicTime;
 
     public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
-    public String getreateTime() {
+    public String getcreateTime() {
         return createTime;
     }
 
@@ -50,5 +51,13 @@ public class Note {
 
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    public long getLogicTime() {
+        return logicTime;
+    }
+
+    public void setLogicTime(long logicTime) {
+        this.logicTime = logicTime;
     }
 }
