@@ -1,7 +1,6 @@
 package com.cspup.notespro.websocket;
 
 import com.cspup.notespro.DTO.NoteDTO;
-import com.cspup.notespro.DTO.WsNote;
 import com.cspup.notespro.entity.Note;
 import com.cspup.notespro.service.NoteService;
 import com.cspup.notespro.utils.ItemList;
@@ -16,10 +15,8 @@ import jakarta.websocket.server.ServerEndpoint;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +37,7 @@ public class NoteWebsocketServer {
     private static final ConcurrentHashMap<String, NoteWebsocketServer> webSocketMap  = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, HashSet<String>> noteWsMap  = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String,ItemList> itemListMap = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, String> wsIdLabelMap = new ConcurrentHashMap<>();
     private String uId = null;
     private static NoteService noteService;
     private final JsonMapper jsonMapper = new JsonMapper();
@@ -70,6 +68,7 @@ public class NoteWebsocketServer {
             ItemList itemList = new ItemList();
             itemListMap.put(params.get("label").get(0),itemList);
         }
+        wsIdLabelMap.put(uId, params.get("label").get(0));
 
         log.info("【websocket消息】有新的连接，总数：{}",webSocketMap.size());
     }
@@ -81,6 +80,14 @@ public class NoteWebsocketServer {
             //从set中删除
             webSocketSet.remove(this);
         }
+        if (wsIdLabelMap.containsKey(uId)){
+            String label1 = wsIdLabelMap.get(uId);
+            if (noteWsMap.get(label1)!=null) {
+                noteWsMap.get(label1).remove(uId);
+            }
+            wsIdLabelMap.remove(uId);
+        }
+
         log.info("【websocket消息】连接断开，总数：{}",webSocketSet.size());
     }
 
@@ -104,7 +111,7 @@ public class NoteWebsocketServer {
             }
             try{
                 Note lastObject = (Note) itemListMap.get(noteDTO.getLabel()).getLastObject();
-                // 保证更新到数据库中的是逻辑时间最大的内容
+                // 保证更新到数据库中的内容logicTime最大
                 if (lastObject==null||lastObject.getLogicTime()<=noteDTO.getLogicTime()){
                     noteService.updateNote(note);
                     itemListMap.get(noteDTO.getLabel()).append(note, noteDTO.getLogicTime());
