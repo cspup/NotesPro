@@ -36,6 +36,7 @@ public class NoteService {
         this.dataSource = dataSource;
     }
 
+//    TODO:之后将存储方式改为一个文档一个大字符串文件进行存储，不再存到数据库中
     public void createNote(String content, String label){
         Note note = new Note();
         note.setContent(content);

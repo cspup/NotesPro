@@ -11,6 +11,10 @@ public class CreateId {
     private static long lastTimeStamp = -1L;
     private static long sequence = 0L;
 
+    /**
+     * 获得生成的id
+     * @return 雪花算法生成的id
+     */
     static public synchronized long next() {
         long currTimeStamp = System.currentTimeMillis();
         if (currTimeStamp < lastTimeStamp) {
@@ -33,6 +37,10 @@ public class CreateId {
         return currTimeStamp - startTimeStamp << 13 | sequence;
     }
 
+    /**
+     * 获取62位编码后的短id
+     * @return 62位编码的短id
+     */
     static public synchronized String nextId() {
         return encode62(next());
     }
