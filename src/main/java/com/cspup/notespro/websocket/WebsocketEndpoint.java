@@ -4,7 +4,6 @@ import com.cspup.notespro.delta.Delta;
 import com.cspup.notespro.delta.NoteDelta;
 import com.cspup.notespro.service.NoteService;
 import com.cspup.notespro.service.OperationLogService;
-import com.cspup.notespro.service.UserManager;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.websocket.*;
@@ -16,10 +15,10 @@ import org.springframework.stereotype.Component;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * @author csp
@@ -33,17 +32,13 @@ public class WebsocketEndpoint {
 
 
     // 使用线程安全的集合来存储Session对象
-    private static final Collection<Session> sessions = new CopyOnWriteArraySet<>();
-    private static final Map<String, Collection<Session>> sessionsManger = new ConcurrentHashMap<>();
+    private static final Set<Session> sessions = new CopyOnWriteArraySet<>();
 
-    private static final UserManager userManger = new UserManager();
+    // 保存label对应的session
+    private static final Map<String, Set<Session>> sessionsManger = new ConcurrentHashMap<>();
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
-
-    private static final BlockingQueue<String> messageQueue = new LinkedBlockingQueue<>();
-
-    private static final Map<String, BlockingQueue<String>> messageManger = new ConcurrentHashMap<>();
-
+    // session对应的label
     private static final Map<Session, String> sessionLabel = new ConcurrentHashMap<>();
     private static NoteService noteService;
 
@@ -68,16 +63,18 @@ public class WebsocketEndpoint {
         if (!labels.isEmpty()) {
             String label = labels.get(0);
             sessionLabel.put(session, label);
-            Collection<Session> sessions;
-            // 是否是新建的文档
-            if (!sessionsManger.containsKey(label)) {
-                // 保存对应的session
-                sessions = new CopyOnWriteArraySet<>();
-            } else {
-                sessions = sessionsManger.get(label);
-            }
-            sessions.add(session);
-            sessionsManger.put(label, sessions);
+            // computeIfAbsent会检查是否存在key对应的value，如果不存在使用给出lambda表达式创建，如果存在返回value
+            // computeIfAbsent是原子操作，保证线程安全
+            sessionsManger.computeIfAbsent(label,k -> ConcurrentHashMap.newKeySet()).add(session);
+//            Set<Session> sessions;
+//            if (!sessionsManger.containsKey(label)) {
+//                // 保存对应的session
+//                sessions = new CopyOnWriteArraySet<>();
+//            } else {
+//                sessions = sessionsManger.get(label);
+//            }
+//            sessions.add(session);
+//            sessionsManger.put(label, sessions);
         } else {
             onClose(session);
         }
@@ -88,7 +85,7 @@ public class WebsocketEndpoint {
         log.info("【websocket消息】收到客户端发来的消息：{}", message);
         try {
             // 先验证客户端和服务端版本号是否一致，一致则直接应用操作
-            // 不一致，从客户端版本到服务端版本遍历，进行操作转换解决冲突
+            // 不一致，从客户端版本到服务端版本遍历操作日志，进行操作转换解决冲突
             // 应用转换后的操作
             NoteDelta client = objectMapper.readValue(message, NoteDelta.class);
             NoteDelta server = noteService.getServerDelta(client.getLabel());
@@ -112,6 +109,9 @@ public class WebsocketEndpoint {
             origin = origin.compose(delta);
             server.setDelta(origin);
             server.increaseVersion();
+
+            // 保存文档
+            noteService.saveNote(sessionLabel.get(session), objectMapper.writeValueAsString(server));
             // 保存操作日志
             oplogService.addOpLog(server.getLabel(), server.getVersion(), delta.toString());
 
@@ -119,8 +119,6 @@ public class WebsocketEndpoint {
             NoteDelta sendDelta = new NoteDelta(false, server.getLabel(), server.getVersion(), delta);
             broadcast(sessionLabel.get(session), objectMapper.writeValueAsString(sendDelta), session.getId());
 
-            // 保存文档
-            noteService.saveNote(sessionLabel.get(session), objectMapper.writeValueAsString(server));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
