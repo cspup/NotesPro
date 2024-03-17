@@ -10,11 +10,17 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface NoteMapper {
-    public Note selectNote(Note note);
+    Note selectNote(Note note);
 
-    public Note selectNoteById(Long id);
+    Note selectNoteById(Long id);
 
-    public Note selectNoteByLabel(String label);
+    Note selectNoteByLabel(String label);
     int addNote(Note note);
-    public int updateNote(Note note);
+    int updateNote(Note note);
+
+    String getFilePath(String label);
+
+    int addFilePath(String label, String path);
+    int updateFilePath(String label, String path);
+
 }

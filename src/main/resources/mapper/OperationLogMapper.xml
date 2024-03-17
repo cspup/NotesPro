@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cspup.notespro.mapper.OperationLogMapper">
+
+    <resultMap id="OperationLog" type="com.cspup.notespro.entity.OperationLog">
+        <id property="label" column="label"/>
+        <result property="version" column="version"/>
+        <result property="op" column="op"/>
+    </resultMap>
+
+    <select id="getOpLog" resultMap="OperationLog">
+        select label,version,op
+        from operation_log
+        where label=#{label} and version=#{version}
+    </select>
+    
+    <insert id="addOpLog" parameterType="OperationLog">
+        insert into operation_log (label, version, op) values (#{label},#{version},#{op})
+    </insert>
+
+    <update id="updateOpLog" parameterType="OperationLog">
+        update operation_log set op = #{op} where label=#{label} and version=#{version}
+    </update>
+
+</mapper>

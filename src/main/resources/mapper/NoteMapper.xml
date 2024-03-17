@@ -32,5 +32,21 @@
         </set>
         where id = #{id}
     </update>
+    
+    <select id="getFilePath" resultType="String">
+        select path
+        from file
+        where label = #{label}
+    </select>
+
+    <insert id="addFilePath">
+        insert into file(label, path) values(#{label},#{path})
+    </insert>
+
+    <update id="updateFilePath">
+        update file
+        set path = #{path}
+        where label = #{label}
+    </update>
 
 </mapper>

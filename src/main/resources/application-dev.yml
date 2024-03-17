@@ -16,12 +16,12 @@ spring:
       idle-timeout: 600000
       max-lifetime: 28740000
       auto-commit: true
-      pool-name: NotesCP
+      pool-name: NoteCP
       connection-test-query: select 1
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3307/notes?serverTimezone=UTC&autoReconnect=true
+    url: jdbc:mysql://127.0.0.1:3306/note?serverTimezone=UTC&autoReconnect=true
     username: dev
-    password: 123
+    password: 1234
   data:
     redis:
       database: 1
@@ -32,7 +32,7 @@ spring:
           max-idle: 300
           max-active: 8000
           max-wait: 500
-      password: ykj1036!
+      password: 123
 mybatis:
   type-aliases-package: com.cspup.notespro.entity
   mapper-locations: classpath*:mapper/**/*Mapper.xml
